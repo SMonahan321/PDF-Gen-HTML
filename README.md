@@ -1,8 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ### Contentful Setup
-
+ 
 1. Create a `.env.local` file at the project root with:
+
 
 ```
 CONTENTFUL_SPACE=your_space_id
