@@ -8,9 +8,8 @@ type PageProps = {
   params: { slug: string };
 };
 
-export async function generateStaticParams() {
-  return [] as { slug: string }[];
-}
+// Render dynamically on the server so any slug works in production
+export const dynamic = "force-dynamic";
 
 export default async function PatientEducationPage({ params }: PageProps) {
   const awaitedParams = await params;
