@@ -10,6 +10,7 @@ type PageProps = {
 
 // Render dynamically on the server so any slug works in production
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default async function PatientEducationPage({ params }: PageProps) {
   const awaitedParams = await params;
