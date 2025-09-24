@@ -8,6 +8,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ```
 CONTENTFUL_SPACE=your_space_id
 CONTENTFUL_DELIVERY_API=your_cda_access_token
+CONTENTFUL_CHILDREN_S_SPACE_DELIVERY_API=your_cda_access_token_for_childrens_space
 CONTENTFUL_PDF_GEN_CT=patient_education_content_type_id
 CONTENTFUL_ENVIRONMENT=your_environment_id # defaults to develop if omitted
 ```
