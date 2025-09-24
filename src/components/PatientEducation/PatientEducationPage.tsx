@@ -1,12 +1,15 @@
 import { format } from "date-fns";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
-import type { Document } from "@contentful/rich-text-types";
-import type { PatientEducationEntry } from "@/lib/types";
+import type { 
+  PatientEducationEntry, 
+  ConditionEntry, 
+  TreatmentEntry,
+} from "@/lib/types";
 
 interface PatientEducationPageProps {
   entry: PatientEducationEntry;
-  relatedConditions: any[];
-  relatedTreatments: any[];
+  relatedConditions: ConditionEntry[];
+  relatedTreatments: TreatmentEntry[];
 }
 
 export default function PatientEducationPage({ 

@@ -2,7 +2,7 @@ import { fetchByUrn } from './fetchByUrn';
 import type { ConditionEntry, TreatmentEntry, ResourceLink } from './types';
 
 export async function fetchRelatedEntries(
-  entries: (any | ResourceLink)[]
+  entries: (ConditionEntry | TreatmentEntry | ResourceLink)[]
 ): Promise<(ConditionEntry | TreatmentEntry)[]> {
   const results = await Promise.allSettled(
     entries.map(async (entry) => {
