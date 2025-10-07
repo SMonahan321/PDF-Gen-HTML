@@ -1,0 +1,37 @@
+diff --git a/node_modules/@bynder/bynder-js-sdk/dist/bynder-js-sdk.js b/node_modules/@bynder/bynder-js-sdk/dist/bynder-js-sdk.js
+index 7a9a9e4..a3c226c 100755
+--- a/node_modules/@bynder/bynder-js-sdk/dist/bynder-js-sdk.js
++++ b/node_modules/@bynder/bynder-js-sdk/dist/bynder-js-sdk.js
+@@ -21,7 +21,31 @@ var axios = require("axios");
+ var _require = require("path"),
+   basename = _require.basename;
+ var isUrl = require("is-url");
+-var joinUrl = require("proper-url-join");
++// Custom joinUrl implementation compatible with Next.js
++function joinUrl(base, path, options = {}) {
++  if (typeof path === 'object' && path !== null) {
++    // Handle case where path is an object with query parameters
++    const query = path.query;
++    if (query) {
++      const queryString = require("query-string");
++      const queryStr = queryString.stringify(query);
++      return queryStr ? `${base}?${queryStr}` : base;
++    }
++    return base;
++  }
++
++  // Normal URL joining
++  const cleanBase = base.replace(/\/$/, '');
++  const cleanPath = path.replace(/^\//, '');
++  const result = `${cleanBase}/${cleanPath}`;
++
++  // Add trailing slash if requested
++  if (options.trailingSlash) {
++    return result.endsWith('/') ? result : `${result}/`;
++  }
++
++  return result;
++}
+ var queryString = require("query-string");
+ var simpleOAuth2 = require("simple-oauth2");
+ var pkg = require("../package.json");
