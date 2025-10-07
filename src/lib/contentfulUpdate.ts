@@ -15,8 +15,6 @@ export async function updatePatientEducationEntry(options) {
     // Get Contentful Management API client
     const client = getManagementClient();
 
-    console.log(11, spaceId);
-
     // Get the space
     const space = await client.getSpace(spaceId);
 
