@@ -86,6 +86,24 @@ npm run dev
 
 Server will start on: **http://localhost:3050**
 
+### 5. Local Development with Ngrok
+
+For local development, you need to expose your local server to the internet so Contentful webhooks can reach it:
+
+```bash
+ngrok http 3050
+```
+
+This will generate a public URL (e.g., `https://35bfc038e17d.ngrok-free.app`).
+
+**Configure Contentful Webhook:**
+1. Go to Contentful → Settings → Webhooks
+2. Set the webhook URL to: `https://35bfc038e17d.ngrok-free.app/api/webhook/pdf`
+   _(Replace with your actual ngrok URL)_
+3. Make sure to trigger on Entry Publish events
+
+**Note**: The ngrok URL changes each time you restart ngrok. Update the webhook URL in Contentful whenever you restart ngrok.
+
 ---
 
 ## 🌐 Routes & Endpoints
