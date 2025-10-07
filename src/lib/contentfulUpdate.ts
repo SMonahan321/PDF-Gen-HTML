@@ -1,36 +1,15 @@
-import { getManagementClient } from './contentful';
-
-export interface PatientEducationPDFInfo {
-  fileName: string;
-  filePath: string;
-  url: string;
-  fileSize: number;
-  generatedAt: string;
-}
-
-export interface PatientEducationUpdateOptions {
-  entryId: string;
-  spaceId: string;
-  environment?: string;
-  pdfInfo: PatientEducationPDFInfo;
-}
-
-export interface ContentfulUpdateResult {
-  success: boolean;
-  entry?: any;
-  error?: string;
-}
+import { getManagementClient } from "@/lib/contentful-cma";
 
 /**
  * Updates a Patient Education entry with PDF information
  * This function is specifically designed for patientEducation content type
  */
-export async function updatePatientEducationEntry(options: PatientEducationUpdateOptions): Promise<ContentfulUpdateResult> {
+export async function updatePatientEducationEntry(options) {
   const { 
     entryId, 
     spaceId, 
     environment = 'master',
-    pdfInfo
+    asset
   } = options;
 
   try {
@@ -38,6 +17,8 @@ export async function updatePatientEducationEntry(options: PatientEducationUpdat
 
     // Get Contentful Management API client
     const client = getManagementClient();
+
+    console.log(11, spaceId)
 
     // Get the space
     const space = await client.getSpace(spaceId);
@@ -52,42 +33,11 @@ export async function updatePatientEducationEntry(options: PatientEducationUpdat
     if (entry.sys.contentType.sys.id !== 'patientEducation') {
       throw new Error(`Entry ${entryId} is not a patientEducation content type. Found: ${entry.sys.contentType.sys.id}`);
     }
-    
-    // Prepare update data for patientEducation content type
-    const updateData: any = {
-      sys: {
-        type: 'Entry',
-        id: entryId,
-        version: entry.sys.version + 1, // Increment version for update
-      },
-      fields: { ...entry.fields }
-    };
 
-    // Add PDF information to patientEducation fields
-    updateData.fields.pdfUrl = {
-      'en-US': pdfInfo.url
-    };
-
-    updateData.fields.pdfFileName = {
-      'en-US': pdfInfo.fileName
-    };
-
-    updateData.fields.pdfFilePath = {
-      'en-US': pdfInfo.filePath || 'Generated as stream'
-    };
-
-    updateData.fields.pdfGeneratedAt = {
-      'en-US': pdfInfo.generatedAt
-    };
-
-    updateData.fields.pdfFileSize = {
-      'en-US': pdfInfo.fileSize
-    };
+    entry.fields.pdf = { 'en-US': [asset] };
 
     // Update the entry
-    const updatedEntry = await entry.update(updateData);
-    
-    // Publish the entry (optional - uncomment if you want to auto-publish)
+    const updatedEntry = await entry.update();
     // await updatedEntry.publish();
 
     console.log(`Patient Education entry updated successfully: ${entryId}`);
@@ -104,46 +54,5 @@ export async function updatePatientEducationEntry(options: PatientEducationUpdat
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     };
-  }
-}
-
-/**
- * Updates Patient Education entry with complete PDF information
- */
-export async function updatePatientEducationWithPDFInfo(
-  entryId: string,
-  spaceId: string,
-  pdfInfo: {
-    fileName: string;
-    filePath: string;
-    url: string;
-    fileSize: number;
-  },
-  environment: string = 'master'
-): Promise<ContentfulUpdateResult> {
-  return updatePatientEducationEntry({
-    entryId,
-    spaceId,
-    environment,
-    pdfInfo: {
-      ...pdfInfo,
-      generatedAt: new Date().toISOString()
-    }
-  });
-}
-
-/**
- * Extracts space ID from Contentful URN
- */
-export function extractSpaceIdFromUrn(urn: string): string | null {
-  try {
-    const parts = urn.split('/');
-    if (parts.length >= 2 && parts[0] === 'urn:contentful') {
-      return parts[1];
-    }
-    return null;
-  } catch (error) {
-    console.error('Failed to extract space ID from URN:', error);
-    return null;
   }
 }

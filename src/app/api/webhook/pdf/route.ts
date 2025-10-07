@@ -3,6 +3,7 @@ export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
 import { generatePDFFromURL } from '@/lib/pdfGenerator';
 import { uploadPdfToBynder } from '@/lib/uploadPdfToBynder';
+import { updatePatientEducationEntry } from "@/lib/contentfulUpdate";
 
 /**
  * Webhook endpoint for PDF generation
@@ -13,6 +14,7 @@ import { uploadPdfToBynder } from '@/lib/uploadPdfToBynder';
  *   "entityId": "entry-id",
  *   "environment": "master",
  *   "spaceId": "space-id",
+ *   "userId": "user-id",
  *   "slug": {
  *     "en-US": "patient-education-slug"
  *   },
@@ -23,16 +25,32 @@ import { uploadPdfToBynder } from '@/lib/uploadPdfToBynder';
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook origin (optional security)
-    const origin = request.headers.get('origin');
-    const userAgent = request.headers.get('user-agent');
-    
-    console.log(`Webhook PDF request from: ${origin} (${userAgent})`);
+    // should be secret, custom header coming in from Contentful
+    const inboundRevalToken = request.headers.get('x-contentful-pdf-generation');
+    // Check for secret to confirm this is a valid request
+    if (!inboundRevalToken) {
+      return NextResponse.json({
+        success: false,
+        error: 'x-contentful-pdf-generation header not defined',
+      }, { status: 401 });
+    } else if (inboundRevalToken !== process.env.CONTENTFUL_PDF_GENERATION_TOKEN) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid token',
+      }, { status: 401 });
+    }
 
     const body = await request.json();
     
     // Extract data from webhook payload
-    const { slug, entityId, spaceId, environment, parameters } = body;
+    const { slug, entityId, spaceId, environment, parameters, userId } = body;
+
+    if (userId === process.env.CONTENTFUL_SYSTEM_USER_ID) {
+      return NextResponse.json({
+        success: false,
+        error: 'Ignoring system user changes',
+      }, { status: 400 });
+    }
     
     // Validate required fields
     if (!slug?.['en-US']) {
@@ -53,73 +71,33 @@ export async function POST(request: NextRequest) {
     if (result.success) {
       // Upload PDF to Bynder
       const bynderResult = await uploadPdfToBynder(result.buffer, result.fileName!, entityId);
-      
-      console.log('Bynder upload result:', bynderResult);
 
       if (bynderResult.success) {
-        return NextResponse.json({
-          success: true,
-          message: 'PDF generated and uploaded successfully',
-          data: {
-            slug: slug?.['en-US'],
-            entityId,
-            spaceId,
-            environment,
-            pdfInfo: {
-              fileName: result.fileName,
-              fileSize: result.buffer!.length,
-              generatedAt: new Date().toISOString()
-            },
-            asset: bynderResult.asset,
-            timestamp: new Date().toISOString()
-          }
-        }, { status: 200 });
-      } else {
-        return NextResponse.json({
-          success: false,
-          message: 'PDF generated but Bynder upload failed',
-          error: bynderResult.error,
-          data: {
-            slug: slug?.['en-US'],
-            entityId,
-            spaceId,
-            environment,
-            pdfInfo: {
-              fileName: result.fileName,
-              fileSize: result.buffer!.length,
-              generatedAt: new Date().toISOString()
-            },
-            timestamp: new Date().toISOString()
-          }
-        }, { status: 500 });
-      }
-    } else {
-      // Log generation failure
-      console.error(`Webhook PDF generation failed:`, {
-        slug: slug?.['en-US'],
-        entityId,
-        error: result.error
-      });
-
-      return NextResponse.json({
-        success: false,
-        message: 'PDF generation failed',
-        error: result.error,
-        data: {
-          slug: slug?.['en-US'],
-          entityId,
+        const contentfulUpdate = await updatePatientEducationEntry({
+          entryId: entityId,
           spaceId,
           environment,
-          htmlPath,
-          timestamp: new Date().toISOString(),
-          parameters
+          asset: bynderResult.asset,
+        })
+        if (contentfulUpdate.success) {
+          return NextResponse.json({
+            success: true,
+            message: 'PDF generated and uploaded successfully',
+            data: {
+              asset: bynderResult.asset,
+              timestamp: new Date().toISOString()
+            }
+          }, { status: 200 });
         }
-      }, { status: 500 });
+      }
     }
 
+    return NextResponse.json({
+      success: false,
+      message: 'PDF generation failed',
+    }, { status: 500 });
+
   } catch (error) {
-    console.error('Webhook PDF generation error:', error);
-    
     return NextResponse.json({
       success: false,
       error: 'Internal server error',

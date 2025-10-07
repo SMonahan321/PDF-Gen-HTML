@@ -1,4 +1,4 @@
-import { getClient, getRequiredEnv } from "@/lib/contentful";
+import { getClient } from "@/lib/contentful";
 import type { PatientEducationEntry } from "./types";
 
 export async function fetchPatientEducationBySlug(params: {
@@ -8,7 +8,7 @@ export async function fetchPatientEducationBySlug(params: {
   try {
     const { locale, slug } = params;
     const client = getClient();
-    const contentTypeId = getRequiredEnv("CONTENTFUL_PDF_GEN_CT");
+    const contentTypeId = process.env.CONTENTFUL_PDF_GEN_CT;
 
     const query: Record<string, unknown> = {
       content_type: contentTypeId,
