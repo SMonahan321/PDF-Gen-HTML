@@ -1,4 +1,4 @@
-import Bynder from '@bynder/bynder-js-sdk';
+import Bynder from "@bynder/bynder-js-sdk";
 
 const bynder = new Bynder({
   baseURL: process.env.BYNDER_BASE_URL,
@@ -33,17 +33,17 @@ const createMetaProperty = (key, value) => ({ [`metaproperty.${key}`]: value });
  * @returns {Object} - The result of the upload operation.
  */
 const uploadToBynder = async (data) => {
-  const { stream, name, origName, origUrl, mediaId, entityId } = data;
-  const fileExtension = origName.split('.').pop();
-  let assetType = 'Photography';
+  const { stream, name, origName, mediaId, entityId } = data;
+  const fileExtension = origName.split(".").pop();
+  let assetType = "Photography";
 
   // Determine asset type based on file extension
-  if (fileExtension.includes('pdf')) {
-    assetType = 'Documents';
-  } else if (fileExtension.includes('mov') || fileExtension.includes('mp4')) {
-    assetType = 'Videos';
-  } else if (fileExtension.includes('svg')) {
-    assetType = 'Graphics';
+  if (fileExtension.includes("pdf")) {
+    assetType = "Documents";
+  } else if (fileExtension.includes("mov") || fileExtension.includes("mp4")) {
+    assetType = "Videos";
+  } else if (fileExtension.includes("svg")) {
+    assetType = "Graphics";
   }
 
   try {
@@ -56,15 +56,15 @@ const uploadToBynder = async (data) => {
         ...(mediaId ? { mediaId } : {}),
         brandId: process.env.BYNDER_BRAND_ID,
         name,
-        description: '',
+        description: "",
         isPublic: true,
-        ...createMetaProperty(metaPropertyMap['assetsubtype'], 'dotcom'),
-        ...createMetaProperty(metaPropertyMap['PatientName'], entityId),
-        ...createMetaProperty(metaPropertyMap['assettype'], assetType),
-        ...createMetaProperty(metaPropertyMap['FileExtension'], fileExtension),
+        ...createMetaProperty(metaPropertyMap.assetsubtype, "dotcom"),
+        ...createMetaProperty(metaPropertyMap.PatientName, entityId),
+        ...createMetaProperty(metaPropertyMap.assettype, assetType),
+        ...createMetaProperty(metaPropertyMap.FileExtension, fileExtension),
         ...createMetaProperty(
-          metaPropertyMap['Organization'],
-          "Children's Health"
+          metaPropertyMap.Organization,
+          "Children's Health",
         ),
       },
     };
@@ -86,7 +86,7 @@ const fetchBynderAssetById = async (mediaID) => {
     return await bynder.getMediaInfo({ id: mediaID });
   } catch (error) {
     throw new Error(
-      `Attempting to find Bynder asset ID [${mediaID}]: ${error.message}`
+      `Attempting to find Bynder asset ID [${mediaID}]: ${error.message}`,
     );
   }
 };
@@ -99,7 +99,7 @@ const fetchBynderAssetById = async (mediaID) => {
  * @param {number} [searchParams.limit=100] - Maximum number of results to return
  * @param {number} [searchParams.page=1] - Page number for pagination
  * @returns {Promise<Array>} - Array of matching media assets
- * 
+ *
  * @example
  * // Search for PDFs with a specific entity ID
  * const results = await searchMediaByMetaPropertyAndName({
@@ -113,42 +113,38 @@ const fetchBynderAssetById = async (mediaID) => {
  * });
  */
 const searchMediaByMetaPropertyAndName = async (searchParams) => {
-  try {
-    const { name, metaProperties = {}, limit = 100, page = 1 } = searchParams;
+  const { name, metaProperties = {}, limit = 100, page = 1 } = searchParams;
 
-    // Build query parameters
-    const queryParameters = {
-      limit,
-      page,
-    };
+  // Build query parameters
+  const queryParameters = {
+    limit,
+    page,
+  };
 
-    // Add name/keyword search if provided
-    if (name) {
-      queryParameters.keyword = name;
-    }
-
-    // Fetch metaproperty map to convert names to IDs
-    const metaPropertyMap = await fetchMetaProperties();
-
-    // Add metaproperty filters
-    for (const [propName, propValue] of Object.entries(metaProperties)) {
-      const metaPropertyId = metaPropertyMap[propName];
-      
-      if (!metaPropertyId) {
-        continue;
-      }
-
-      // Bynder uses property_<metaPropertyId> format for filtering
-      queryParameters[`property_${metaPropertyId}`] = propValue;
-    }
-
-    // Execute search
-    const results = await bynder.getMediaList(queryParameters);
-
-    return results;
-  } catch (error) {
-    throw error;
+  // Add name/keyword search if provided
+  if (name) {
+    queryParameters.keyword = name;
   }
+
+  // Fetch metaproperty map to convert names to IDs
+  const metaPropertyMap = await fetchMetaProperties();
+
+  // Add metaproperty filters
+  for (const [propName, propValue] of Object.entries(metaProperties)) {
+    const metaPropertyId = metaPropertyMap[propName];
+
+    if (!metaPropertyId) {
+      continue;
+    }
+
+    // Bynder uses property_<metaPropertyId> format for filtering
+    queryParameters[`property_${metaPropertyId}`] = propValue;
+  }
+
+  // Execute search
+  const results = await bynder.getMediaList(queryParameters);
+
+  return results;
 };
 
 /**
@@ -157,7 +153,7 @@ const searchMediaByMetaPropertyAndName = async (searchParams) => {
  * @param {string} searchParams.name - Exact name to match
  * @param {Object} searchParams.metaProperties - Metaproperties to filter by
  * @returns {Promise<Object|null>} - The matching asset or null if not found
- * 
+ *
  * @example
  * // Find specific PDF by entity ID and exact name
  * const asset = await findMediaByExactNameAndMetaProperty({
@@ -169,30 +165,26 @@ const searchMediaByMetaPropertyAndName = async (searchParams) => {
  * });
  */
 const findMediaByExactNameAndMetaProperty = async (searchParams) => {
-  try {
-    const { name, metaProperties = {} } = searchParams;
+  const { name, metaProperties = {} } = searchParams;
 
-    if (!name) {
-      throw new Error('Name parameter is required for exact match search');
-    }
+  if (!name) {
+    throw new Error("Name parameter is required for exact match search");
+  }
 
-    // Use the search function to get candidates
-    const results = await searchMediaByMetaPropertyAndName({
-      name,
-      metaProperties,
-      limit: 100,
-    });
+  // Use the search function to get candidates
+  const results = await searchMediaByMetaPropertyAndName({
+    name,
+    metaProperties,
+    limit: 100,
+  });
 
-    // Find exact name match
-    const exactMatch = results.find((asset) => asset.name === name);
+  // Find exact name match
+  const exactMatch = results.find((asset) => asset.name === name);
 
-    if (exactMatch) {
-      return exactMatch;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    throw error;
+  if (exactMatch) {
+    return exactMatch;
+  } else {
+    return null;
   }
 };
 

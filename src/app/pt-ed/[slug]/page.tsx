@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
+import PatientEducationPage from "@/components/PatientEducation/PatientEducationPage";
 import { fetchPatientEducationBySlug } from "@/lib/fetchPatientEducationBySlug";
 import { fetchRelatedEntries } from "@/lib/fetchRelatedEntries";
-import PatientEducationPage from "@/components/PatientEducation/PatientEducationPage";
 import type { PatientEducationEntry } from "@/lib/types";
 
 type PageProps = {
@@ -25,21 +25,19 @@ export default async function Page({ params }: PageProps) {
 
   // Fetch related entries in parallel
   const [relatedConditions, relatedTreatments] = await Promise.all([
-    typedEntry.fields.relatedConditions 
+    typedEntry.fields.relatedConditions
       ? fetchRelatedEntries(typedEntry.fields.relatedConditions)
       : Promise.resolve([]),
-    typedEntry.fields.relatedTreatments 
+    typedEntry.fields.relatedTreatments
       ? fetchRelatedEntries(typedEntry.fields.relatedTreatments)
-      : Promise.resolve([])
+      : Promise.resolve([]),
   ]);
 
   return (
-    <PatientEducationPage 
+    <PatientEducationPage
       entry={typedEntry}
       relatedConditions={relatedConditions}
       relatedTreatments={relatedTreatments}
     />
   );
 }
-
-

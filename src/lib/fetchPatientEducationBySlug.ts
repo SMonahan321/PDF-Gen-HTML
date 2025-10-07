@@ -16,17 +16,17 @@ export async function fetchPatientEducationBySlug(params: {
       include: 2,
       "fields.slug": slug,
     };
-    
+
     if (locale) {
       query.locale = locale;
     }
 
     const response = await client.getEntries(query);
-    
+
     if (!response.items.length) {
       return null;
     }
-    
+
     return response.items[0] as PatientEducationEntry;
   } catch (error) {
     console.error("Contentful fetch error:", error);

@@ -1,12 +1,20 @@
-import {fetchBynderAssetById, findMediaByExactNameAndMetaProperty, uploadToBynder} from "@/lib/bynder-service";
+import {
+  fetchBynderAssetById,
+  findMediaByExactNameAndMetaProperty,
+  uploadToBynder,
+} from "@/lib/bynder-service";
 
-export const uploadPdfToBynder = async (pdfBuffer: Buffer, fileName: string, entityId: string) => {
+export const uploadPdfToBynder = async (
+  pdfBuffer: Buffer,
+  fileName: string,
+  entityId: string,
+) => {
   try {
     const metaProperties = {
       PatientName: entityId,
-      assettype: 'documents',
-      FileExtension: 'pdf',
-      Organization: 'ChildrensHealth',
+      assettype: "documents",
+      FileExtension: "pdf",
+      Organization: "ChildrensHealth",
     };
 
     // Find exact match
@@ -37,13 +45,12 @@ export const uploadPdfToBynder = async (pdfBuffer: Buffer, fileName: string, ent
       success: true,
       asset,
     };
-
   } catch (error) {
     console.error(`❌ Upload failed: ${error.message}`);
     return {
       success: false,
       error: error.message,
-      asset: null
+      asset: null,
     };
   }
-}
+};

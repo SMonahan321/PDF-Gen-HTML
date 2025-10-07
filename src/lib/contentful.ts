@@ -7,7 +7,10 @@ export function getClient() {
   return createClient({ space: spaceId, accessToken, environment });
 }
 
-export function getClientForChildrensSpace(spaceId: string, environment: string = 'master') {
+export function getClientForChildrensSpace(
+  spaceId: string,
+  environment: string = "master",
+) {
   const accessToken = process.env.CONTENTFUL_CHILDREN_S_SPACE_DELIVERY_API;
   return createClient({ space: spaceId, accessToken, environment });
 }
