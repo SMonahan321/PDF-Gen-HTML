@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useEffect } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-export default function Error({
+export default function ErrorPage({
   error,
   reset,
 }: {
@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Patient education page error:', error);
+    console.error("Patient education page error:", error);
   }, [error]);
 
   return (
@@ -23,16 +23,19 @@ export default function Error({
               Unable to Load Content
             </h1>
             <p className="text-gray-600 mb-6">
-              We couldn't load this patient education content. This might be due to a temporary issue.
+              We couldn't load this patient education content. This might be due
+              to a temporary issue.
             </p>
             <div className="space-y-3">
               <button
+                type="button"
                 onClick={reset}
                 className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
               >
                 Try again
               </button>
               <button
+                type="button"
                 onClick={() => window.history.back()}
                 className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
               >

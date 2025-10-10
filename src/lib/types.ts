@@ -1,5 +1,12 @@
 import type { Document } from "@contentful/rich-text-types";
 
+export interface BynderImageData {
+  original: string;
+  name: string;
+  width?: number;
+  height?: number;
+}
+
 export interface ContentfulAsset {
   sys: {
     id: string;
@@ -8,7 +15,7 @@ export interface ContentfulAsset {
   fields: {
     title: string;
     description?: string;
-    image: any;
+    image: BynderImageData[];
   };
 }
 
@@ -38,7 +45,7 @@ export interface ContentfulEntry {
       };
     };
   };
-  fields: Record<string, any>;
+  fields: Record<string, unknown>;
 }
 
 export interface PatientEducationEntry extends ContentfulEntry {
@@ -68,7 +75,7 @@ export interface MainContentAreaEntry extends ContentfulEntry {
 
 export interface ResourceLink {
   sys: {
-    type: 'ResourceLink';
+    type: "ResourceLink";
     urn: string;
   };
 }
